@@ -386,48 +386,52 @@
 <div id="modal-overlay" class="hidden"></div>
 <div id="toast-container"></div>
 
-<script>
-(function(){
+<script type="module">
 "use strict";
 
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+const supabaseUrl = 'https://kzgqmaavbbekbqsfjizx.supabase.co';
+const supabaseKey = 'sb_publishable_TpjA50nHTD0mx-0g_xDKCg_kFMf8deg';
+
+const supabase = createClient(supabaseUrl, supabaseKey);
+const ROW_ID = 'my_sync';
+
 /* ===================== DATA LAYER ===================== */
-/* Абстракция хранилища: сейчас работает через localStorage браузера
-   (данные сохраняются между перезагрузками и закрытием вкладки на этом
-   устройстве), но вся остальная логика приложения обращается только
-   к DataStore — при переезде на реальный backend/API достаточно
-   переписать эти 6 методов, остального кода это не коснётся. */
 const DataStore = {
-  async getProgress(){
-    try{ const v = localStorage.getItem('route811:progress'); return v ? JSON.parse(v) : []; }
-    catch(e){ return []; }
+  async getProgress() {
+    const { data, error } = await supabase.from('route811_data').select('progress').eq('id', ROW_ID).single();
+    if (error) console.error("Ошибка загрузки прогресса:", error);
+    return data?.progress || [];
   },
-  async saveProgress(arr){
-    try{ localStorage.setItem('route811:progress', JSON.stringify(arr)); }
-    catch(e){ console.error('saveProgress failed', e); }
+  async saveProgress(arr) {
+    await supabase.from('route811_data').update({ progress: arr }).eq('id', ROW_ID);
   },
-  async getVocab(){
-    try{ const v = localStorage.getItem('route811:vocab'); return v ? JSON.parse(v) : []; }
-    catch(e){ return []; }
+  
+  async getVocab() {
+    const { data, error } = await supabase.from('route811_data').select('vocab').eq('id', ROW_ID).single();
+    if (error) console.error("Ошибка загрузки словаря:", error);
+    return data?.vocab || [];
   },
-  async saveVocab(arr){
-    try{ localStorage.setItem('route811:vocab', JSON.stringify(arr)); }
-    catch(e){ console.error('saveVocab failed', e); }
+  async saveVocab(arr) {
+    await supabase.from('route811_data').update({ vocab: arr }).eq('id', ROW_ID);
   },
-  async getSettings(){
-    try{ const v = localStorage.getItem('route811:settings'); return v ? JSON.parse(v) : {theme:'dark'}; }
-    catch(e){ return {theme:'dark'}; }
+  
+  async getSettings() {
+    const { data, error } = await supabase.from('route811_data').select('settings').eq('id', ROW_ID).single();
+    if (error) console.error("Ошибка загрузки настроек:", error);
+    return data?.settings || { theme: 'dark' };
   },
-  async saveSettings(s){
-    try{ localStorage.setItem('route811:settings', JSON.stringify(s)); }
-    catch(e){ console.error('saveSettings failed', e); }
+  async saveSettings(s) {
+    await supabase.from('route811_data').update({ settings: s }).eq('id', ROW_ID);
   }
 };
 
 /* ===================== DOMAIN CONSTANTS ===================== */
 const LEVELS = [
-  {key:'beginner', name:'Beginner',          start:1,   end:219, color:'var(--lvl-1)'},
-  {key:'elementary', name:'Elementary',       start:220, end:444, color:'var(--lvl-2)'},
-  {key:'pre', name:'Pre-Intermediate',        start:445, end:680, color:'var(--lvl-3)'},
+  {key:'beginner', name:'Beginner',     start:1,   end:219, color:'var(--lvl-1)'},
+  {key:'elementary', name:'Elementary',     start:220, end:444, color:'var(--lvl-2)'},
+  {key:'pre', name:'Pre-Intermediate',    start:445, end:680, color:'var(--lvl-3)'},
   {key:'control', name:'Контрольные',         start:681, end:811, color:'var(--lvl-4)'},
 ];
 const TOTAL = 811;
@@ -905,7 +909,4 @@ function renderAll(){
 }
 
 init();
-})();
 </script>
-</body>
-</html>
