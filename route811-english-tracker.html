@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Route 811 — трекер английского</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3F1FB;
+    --surface:#FFFFFF;
+    --surface-2:#ECE8FA;
+    --text:#181528;
+    --muted:#6B6788;
+    --border:#DEDAF3;
+    --accent:#6D4CE0;
+    --accent-soft:#E9E2FC;
+    --accent-contrast:#FFFFFF;
+    --amber:#6D4CE0;
+    --amber-soft:#E9E2FC;
+    --danger:#D93A6B;
+    --danger-soft:#FBE0EA;
+    --lvl-1:#2D6BE0;
+    --lvl-2:#0EA98C;
+    --lvl-3:#9333EA;
+    --lvl-4:#DB2E7C;
+    --accent-grad:linear-gradient(135deg,#3B82F6,#8B5CF6,#EC4899);
+    --shadow:0 1px 2px rgba(30,20,60,.05), 0 16px 36px -18px rgba(60,40,120,.22);
+    --radius:16px;
+    --radius-sm:10px;
+    color-scheme:light;
+  }
+  html[data-theme="dark"]{
+    --bg:#09070F;
+    --surface:#13111F;
+    --surface-2:#1A1729;
+    --text:#EDE9FB;
+    --muted:#948FBC;
+    --border:#2A2640;
+    --accent:#A78BFA;
+    --accent-soft:#231C3D;
+    --accent-contrast:#09070F;
+    --amber:#A78BFA;
+    --amber-soft:#231C3D;
+    --danger:#F472A0;
+    --danger-soft:#331523;
+    --lvl-1:#38BDF8;
+    --lvl-2:#2DD4BF;
+    --lvl-3:#C084FC;
+    --lvl-4:#F472B6;
+    --accent-grad:linear-gradient(135deg,#38BDF8,#A855F7,#F472B6);
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 0 0 1px rgba(139,92,246,.08), 0 20px 46px -20px rgba(139,92,246,.4);
+    color-scheme:dark;
+  }
+  html[data-theme="dark"] body{
+    background:
+      radial-gradient(circle at 12% -8%, rgba(56,189,248,.18), transparent 42%),
+      radial-gradient(circle at 92% 8%, rgba(168,85,247,.16), transparent 40%),
+      radial-gradient(circle at 50% 110%, rgba(244,114,182,.10), transparent 45%),
+      var(--bg);
+    background-attachment:fixed;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    transition:background .25s ease,color .25s ease;
+  }
+  .num{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3,.display{font-family:'Fraunces',serif;letter-spacing:-.01em;}
+  .hidden{display:none !important;}
+
+  /* loader */
+  #loader{
+    position:fixed;inset:0;display:flex;flex-direction:column;gap:14px;
+    align-items:center;justify-content:center;background:var(--bg);z-index:999;
+  }
+  .spinner{width:34px;height:34px;border-radius:50%;border:3px solid var(--border);
+    border-top-color:var(--accent);animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  #loader span{color:var(--muted);font-size:14px;}
+
+  /* layout */
+  #app{max-width:1100px;margin:0 auto;padding:0 20px 60px;}
+  header.topbar{
+    position:sticky;top:0;z-index:50;background:var(--bg);
+    padding:18px 0 12px;display:flex;align-items:center;justify-content:space-between;gap:16px;
+    border-bottom:1px solid transparent;
+  }
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-mark{
+    width:36px;height:36px;border-radius:10px;background:var(--accent-grad);
+    display:flex;align-items:center;justify-content:center;color:#fff;font-family:'JetBrains Mono',monospace;
+    font-weight:700;font-size:12.5px;flex:none;box-shadow:0 0 0 1px rgba(139,92,246,.25), 0 6px 18px -4px rgba(139,92,246,.6);
+  }
+  .brand-text{line-height:1.15;}
+  .brand-text b{font-family:'Fraunces',serif;font-size:18px;font-weight:700;letter-spacing:-.01em;}
+  .brand-text small{color:var(--muted);font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;}
+  .theme-toggle{
+    width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--surface);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);
+    transition:transform .15s ease, background .2s ease;
+  }
+  .theme-toggle:hover{transform:translateY(-1px);}
+  .theme-toggle:active{transform:scale(.94);}
+
+  nav.tabs{
+    display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);
+    padding:4px;border-radius:12px;margin:14px 0 22px;overflow-x:auto;
+  }
+  nav.tabs button{
+    appearance:none;border:none;background:transparent;color:var(--muted);
+    padding:9px 14px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;
+    white-space:nowrap;transition:background .15s ease,color .15s ease;font-family:inherit;
+  }
+  nav.tabs button:hover{color:var(--text);}
+  nav.tabs button.active{background:var(--accent-grad);color:#fff;box-shadow:0 0 0 1px rgba(139,92,246,.25), 0 4px 16px -4px rgba(139,92,246,.65);}
+
+  section.page{display:none;animation:fadein .35s ease;}
+  section.page.active{display:block;}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  .grid-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  @media (max-width:920px){.grid-cards{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:560px){.grid-cards{grid-template-columns:1fr;}}
+
+  .card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:20px;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:transform .2s ease, box-shadow .2s ease;
+  }
+  .card:before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent-grad);opacity:.7;}
+  .card:hover{transform:translateY(-2px);box-shadow:var(--shadow), 0 0 24px -8px rgba(139,92,246,.35);}
+  .card .k{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;}
+  .card .v{font-family:'Fraunces',serif;font-size:29px;font-weight:700;margin-top:7px;letter-spacing:-.01em;}
+  .card .sub{color:var(--muted);font-size:12.5px;margin-top:5px;}
+
+  .bar{height:8px;border-radius:99px;background:var(--surface-2);border:1px solid var(--border);overflow:hidden;margin-top:10px;}
+  .bar > i{display:block;height:100%;border-radius:99px;background:var(--accent);transition:width .5s cubic-bezier(.22,1,.36,1);}
+
+  .lvl-card{margin-top:16px;}
+  .lvl-card .head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .lvl-card .dot{width:9px;height:9px;border-radius:50%;flex:none;}
+  .lvl-card .name{font-weight:600;font-size:13.5px;display:flex;align-items:center;gap:8px;}
+  .lvl-card .pct{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted);}
+
+  /* journey */
+  .journey{margin-top:26px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:24px 22px 20px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+  .journey:before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent-grad);opacity:.7;}
+  .journey h3{margin:0 0 4px;font-size:17px;font-weight:700;}
+  .journey p.hint{margin:0 0 20px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+  .journey-track{display:flex;width:100%;height:10px;border-radius:99px;overflow:hidden;background:var(--surface-2);border:1px solid var(--border);}
+  .journey-seg{position:relative;height:100%;border-right:2px solid var(--surface);}
+  .journey-seg:last-child{border-right:none;}
+  .journey-seg > i{display:block;height:100%;transition:width .6s cubic-bezier(.22,1,.36,1);}
+  .journey-labels{display:flex;width:100%;margin-top:10px;}
+  .journey-labels .lab{font-size:11px;color:var(--muted);font-weight:600;text-align:center;}
+  .journey-marker{position:relative;height:0;}
+  .journey-marker .pin{
+    position:absolute;top:-26px;transform:translateX(-50%);
+    background:var(--text);color:var(--bg);font-family:'JetBrains Mono',monospace;font-size:10.5px;
+    padding:3px 7px;border-radius:6px;white-space:nowrap;font-weight:700;
+  }
+  .journey-marker .pin:after{content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);
+    width:0;height:0;border:4px solid transparent;border-top-color:var(--text);}
+
+  .completed-banner{
+    margin-top:16px;padding:18px 20px;border-radius:var(--radius);background:var(--accent-soft);
+    border:1px solid var(--accent);color:var(--text);font-weight:700;font-size:15px;
+    display:flex;align-items:center;gap:10px;box-shadow:var(--shadow);
+  }
+
+  /* toolbar / inputs */
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px;}
+  .seg{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);padding:4px;border-radius:10px;flex-wrap:wrap;}
+  .seg button{appearance:none;border:none;background:transparent;color:var(--muted);padding:7px 11px;border-radius:7px;
+    font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s,color .15s;}
+  .seg button.active{background:var(--accent);color:var(--accent-contrast);}
+  input[type=text], input[type=search]{
+    font-family:inherit;font-size:13.5px;padding:9px 12px;border-radius:9px;border:1px solid var(--border);
+    background:var(--surface);color:var(--text);outline:none;
+  }
+  input[type=text]:focus, input[type=search]:focus{border-color:var(--accent);}
+  .search-input{flex:1;min-width:160px;}
+
+  .btn{
+    font-family:inherit;font-weight:600;font-size:13.5px;border-radius:9px;border:1px solid var(--border);
+    padding:9px 14px;cursor:pointer;background:var(--surface);color:var(--text);transition:transform .12s ease, background .15s;
+  }
+  .btn:hover{background:var(--surface-2);}
+  .btn:active{transform:scale(.96);}
+  .btn.primary{background:var(--accent-grad);border-color:transparent;color:#fff;box-shadow:0 0 0 1px rgba(139,92,246,.2), 0 6px 18px -6px rgba(139,92,246,.65);}
+  .btn.primary:hover{filter:brightness(1.06);}
+  .btn.danger{background:var(--danger);border-color:var(--danger);color:#fff;}
+  .btn.ghost{background:transparent;}
+  .btn.small{padding:6px 10px;font-size:12px;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+
+  /* lessons grid */
+  .lessons-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px;
+  }
+  .lesson-item{
+    border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:10px 12px;
+    display:flex;flex-direction:column;gap:8px;transition:border-color .15s, transform .12s;
+  }
+  .lesson-item.done{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 1px rgba(139,92,246,.15), 0 4px 16px -8px rgba(139,92,246,.5);}
+  .lesson-item .row1{display:flex;align-items:center;justify-content:space-between;}
+  .lesson-item .lnum{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;}
+  .lesson-item .badge{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;font-weight:700;
+    padding:2px 6px;border-radius:5px;color:#fff;}
+  .lesson-item button{
+    font-family:inherit;font-size:12px;font-weight:600;border-radius:7px;border:1px solid var(--border);
+    padding:7px 8px;cursor:pointer;background:var(--surface-2);color:var(--text);transition:all .15s;
+  }
+  .lesson-item.done button{background:var(--accent-grad);border-color:transparent;color:#fff;}
+  .lesson-item button:active{transform:scale(.95);}
+
+  .pager{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:20px;color:var(--muted);font-size:13px;}
+  .pager .num{font-weight:700;color:var(--text);}
+
+  /* vocab */
+  .vocab-form{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+  .vocab-form input{flex:1;min-width:140px;}
+  .vocab-list{display:flex;flex-direction:column;gap:8px;}
+  .vocab-row{
+    display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);
+    border-radius:10px;padding:11px 14px;
+  }
+  .vocab-row .w{font-weight:700;min-width:120px;}
+  .vocab-row .t{color:var(--muted);flex:1;}
+  .vocab-row .actions{display:flex;gap:6px;}
+  .empty{
+    text-align:center;color:var(--muted);padding:40px 10px;border:1px dashed var(--border);border-radius:var(--radius);
+    font-size:13.5px;
+  }
+
+  /* settings */
+  .settings-row{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 0;border-bottom:1px solid var(--border);
+  }
+  .settings-row:last-child{border-bottom:none;}
+  .settings-row .txt b{display:block;font-size:14px;margin-bottom:2px;}
+  .settings-row .txt span{color:var(--muted);font-size:12.5px;}
+
+  /* modal */
+  #modal-overlay{
+    position:fixed;inset:0;background:rgba(10,12,18,.5);display:flex;align-items:center;justify-content:center;
+    z-index:200;padding:20px;backdrop-filter:blur(2px);
+  }
+  .modal{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;
+    width:100%;max-width:380px;box-shadow:var(--shadow);animation:pop .2s ease;
+  }
+  @keyframes pop{from{opacity:0;transform:scale(.96);}to{opacity:1;transform:scale(1);}}
+  .modal h3{margin:0 0 8px;font-size:17px;}
+  .modal p{color:var(--muted);font-size:13.5px;line-height:1.5;margin:0 0 16px;}
+  .modal .field{margin-bottom:12px;}
+  .modal .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600;}
+  .modal .field input{width:100%;}
+  .modal .actions{display:flex;justify-content:flex-end;gap:8px;margin-top:6px;}
+  .modal .err{color:var(--danger);font-size:12.5px;margin-top:-6px;margin-bottom:10px;}
+
+  /* toast */
+  #toast-container{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:300;
+    display:flex;flex-direction:column;gap:8px;align-items:center;}
+  .toast{
+    background:var(--text);color:var(--bg);padding:10px 16px;border-radius:9px;font-size:13px;font-weight:600;
+    box-shadow:var(--shadow);animation:toastin .25s ease;
+  }
+  @keyframes toastin{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+  .section-title{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+  .section-title h2{margin:0;font-size:21px;}
+  .section-title .count{color:var(--muted);font-size:13px;}
+
+  ::selection{background:var(--accent);color:#fff;}
+  @media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important;}}
+</style>
+</head>
+<body>
+
+<div id="loader"><div class="spinner"></div><span>Загружаем прогресс…</span></div>
+
+<div id="app" class="hidden">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">811</div>
+      <div class="brand-text">
+        <b>Route&nbsp;811</b><br/>
+        <small>трекер видеоуроков английского</small>
+      </div>
+    </div>
+    <button class="theme-toggle" id="themeToggle" title="Сменить тему">🌙</button>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button data-page="dashboard" class="active">Дашборд</button>
+    <button data-page="lessons">Уроки</button>
+    <button data-page="vocab">Словарь</button>
+    <button data-page="progress">Прогресс</button>
+    <button data-page="settings">Настройки</button>
+  </nav>
+
+  <main>
+    <!-- DASHBOARD -->
+    <section class="page active" id="page-dashboard">
+      <div class="grid-cards" id="dashCards"></div>
+      <div class="journey" id="dashJourney"></div>
+      <div class="grid-cards" style="margin-top:16px;" id="dashLevelCards"></div>
+    </section>
+
+    <!-- LESSONS -->
+    <section class="page" id="page-lessons">
+      <div class="section-title">
+        <h2>Уроки</h2>
+        <span class="count" id="lessonsCount"></span>
+      </div>
+      <div class="toolbar">
+        <div class="seg" id="lessonsFilterSeg"></div>
+        <input type="search" class="search-input" id="lessonsSearch" placeholder="Найти урок по номеру…" />
+      </div>
+      <div class="lessons-grid" id="lessonsGrid"></div>
+      <div class="pager" id="lessonsPager"></div>
+    </section>
+
+    <!-- VOCAB -->
+    <section class="page" id="page-vocab">
+      <div class="section-title">
+        <h2>Мой словарь</h2>
+        <span class="count" id="vocabCount"></span>
+      </div>
+      <div class="vocab-form">
+        <input type="text" id="vocabWordInput" placeholder="Слово" />
+        <input type="text" id="vocabTranslationInput" placeholder="Перевод" />
+        <button class="btn primary" id="vocabAddBtn">Добавить</button>
+      </div>
+      <div class="toolbar">
+        <input type="search" class="search-input" id="vocabSearch" placeholder="Поиск по словарю…" />
+      </div>
+      <div class="vocab-list" id="vocabList"></div>
+    </section>
+
+    <!-- PROGRESS -->
+    <section class="page" id="page-progress">
+      <div class="section-title"><h2>Прогресс</h2></div>
+      <div class="card">
+        <div class="k">Общий прогресс курса</div>
+        <div class="v num" id="progOverallPct">0%</div>
+        <div class="sub" id="progOverallSub"></div>
+        <div class="bar"><i id="progOverallBar" style="width:0%"></i></div>
+      </div>
+      <div class="journey" id="progJourney" style="margin-top:16px;"></div>
+      <div class="grid-cards" style="margin-top:16px;" id="progLevelCards"></div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="page" id="page-settings">
+      <div class="section-title"><h2>Настройки</h2></div>
+      <div class="card">
+        <div class="settings-row">
+          <div class="txt"><b>Тема оформления</b><span>Светлая или тёмная</span></div>
+          <div class="seg" id="settingsThemeSeg">
+            <button data-t="light">Светлая</button>
+            <button data-t="dark">Тёмная</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="txt"><b>Сбросить прогресс</b><span>Снимет отметки со всех уроков</span></div>
+          <button class="btn danger" id="resetProgressBtn">Сбросить прогресс</button>
+        </div>
+        <div class="settings-row">
+          <div class="txt"><b>Очистить словарь</b><span>Удалит все добавленные слова</span></div>
+          <button class="btn danger" id="clearVocabBtn">Очистить словарь</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="modal-overlay" class="hidden"></div>
+<div id="toast-container"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ===================== DATA LAYER ===================== */
+/* Абстракция хранилища: сейчас работает через localStorage браузера
+   (данные сохраняются между перезагрузками и закрытием вкладки на этом
+   устройстве), но вся остальная логика приложения обращается только
+   к DataStore — при переезде на реальный backend/API достаточно
+   переписать эти 6 методов, остального кода это не коснётся. */
+const DataStore = {
+  async getProgress(){
+    try{ const v = localStorage.getItem('route811:progress'); return v ? JSON.parse(v) : []; }
+    catch(e){ return []; }
+  },
+  async saveProgress(arr){
+    try{ localStorage.setItem('route811:progress', JSON.stringify(arr)); }
+    catch(e){ console.error('saveProgress failed', e); }
+  },
+  async getVocab(){
+    try{ const v = localStorage.getItem('route811:vocab'); return v ? JSON.parse(v) : []; }
+    catch(e){ return []; }
+  },
+  async saveVocab(arr){
+    try{ localStorage.setItem('route811:vocab', JSON.stringify(arr)); }
+    catch(e){ console.error('saveVocab failed', e); }
+  },
+  async getSettings(){
+    try{ const v = localStorage.getItem('route811:settings'); return v ? JSON.parse(v) : {theme:'dark'}; }
+    catch(e){ return {theme:'dark'}; }
+  },
+  async saveSettings(s){
+    try{ localStorage.setItem('route811:settings', JSON.stringify(s)); }
+    catch(e){ console.error('saveSettings failed', e); }
+  }
+};
+
+/* ===================== DOMAIN CONSTANTS ===================== */
+const LEVELS = [
+  {key:'beginner', name:'Beginner',          start:1,   end:219, color:'var(--lvl-1)'},
+  {key:'elementary', name:'Elementary',       start:220, end:444, color:'var(--lvl-2)'},
+  {key:'pre', name:'Pre-Intermediate',        start:445, end:680, color:'var(--lvl-3)'},
+  {key:'control', name:'Контрольные',         start:681, end:811, color:'var(--lvl-4)'},
+];
+const TOTAL = 811;
+function levelOf(n){ return LEVELS.find(l => n>=l.start && n<=l.end); }
+function levelSize(l){ return l.end - l.start + 1; }
+
+/* ===================== APP STATE ===================== */
+const state = {
+  viewed: new Set(),
+  vocab: [],
+  theme: 'dark',
+  page: 'dashboard',
+  lessonsFilter: 'all',
+  lessonsSearch: '',
+  lessonsPage: 1,
+  vocabSearch: '',
+};
+const PAGE_SIZE = 100;
+
+/* ===================== INIT ===================== */
+async function init(){
+  const [progress, vocab, settings] = await Promise.all([
+    DataStore.getProgress(), DataStore.getVocab(), DataStore.getSettings()
+  ]);
+  state.viewed = new Set(progress);
+  state.vocab = Array.isArray(vocab) ? vocab : [];
+  state.theme = (settings && settings.theme) || 'dark';
+  applyTheme();
+  buildStaticUI();
+  renderAll();
+  document.getElementById('loader').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+}
+
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme', state.theme);
+  document.getElementById('themeToggle').textContent = state.theme === 'dark' ? '☀️' : '🌙';
+}
+
+/* ===================== STATS ===================== */
+function computeStats(){
+  const viewedCount = state.viewed.size;
+  const overallPct = Math.round((viewedCount/TOTAL)*1000)/10;
+  const maxViewed = viewedCount ? Math.max(...state.viewed) : 0;
+  const currentLevel = maxViewed ? levelOf(maxViewed) : LEVELS[0];
+  const currentIndex = LEVELS.indexOf(currentLevel);
+  const size = levelSize(currentLevel);
+  const inLevel = countInRange(currentLevel.start, currentLevel.end);
+  const levelPct = Math.round((inLevel/size)*1000)/10;
+  const isLast = currentIndex === LEVELS.length - 1;
+  const remaining = Math.max(0, currentLevel.end - maxViewed);
+  const nextLevelName = isLast ? null : LEVELS[currentIndex+1].name;
+  const completed = viewedCount >= TOTAL;
+  return {viewedCount, overallPct, maxViewed, currentLevel, currentIndex, levelPct, remaining, nextLevelName, isLast, completed};
+}
+function countInRange(a,b){
+  let c = 0;
+  state.viewed.forEach(n => { if(n>=a && n<=b) c++; });
+  return c;
+}
+function levelStats(level){
+  const size = levelSize(level);
+  const count = countInRange(level.start, level.end);
+  return {count, size, pct: Math.round((count/size)*1000)/10};
+}
+
+/* ===================== RENDER: DASHBOARD ===================== */
+function renderDashboard(){
+  const s = computeStats();
+  const vocabTotal = state.vocab.length;
+  const cards = [
+    {k:'Пройдено уроков', v:`${s.viewedCount} / ${TOTAL}`, sub:s.completed ? 'Курс завершён 🎉' : `${s.remaining} до конца уровня «${s.currentLevel.name}»`},
+    {k:'Общий прогресс', v:`${s.overallPct}%`, bar:s.overallPct},
+    {k:'Текущий уровень', v:s.currentLevel.name, sub:`${s.levelPct}% этого уровня`, bar:s.levelPct, barColor:s.currentLevel.color},
+    {k:'До следующего уровня', v:s.isLast ? '—' : `${s.remaining} уроков`, sub:s.isLast ? 'Это последний уровень' : `до «${s.nextLevelName}»`},
+    {k:'Слов в словаре', v:String(vocabTotal), sub:'в разделе «Мой словарь»'},
+  ];
+  const wrap = document.getElementById('dashCards');
+  wrap.innerHTML = cards.map(c => `
+    <div class="card">
+      <div class="k">${c.k}</div>
+      <div class="v num">${c.v}</div>
+      ${c.sub ? `<div class="sub">${c.sub}</div>` : ''}
+      ${typeof c.bar === 'number' ? `<div class="bar"><i style="width:${c.bar}%;${c.barColor?`background:${c.barColor}`:''}"></i></div>` : ''}
+    </div>
+  `).join('');
+
+  if(s.completed){
+    wrap.insertAdjacentHTML('afterend', `<div class="completed-banner" id="dashDoneBanner">🎉 Курс завершён! Все ${TOTAL} уроков просмотрены.</div>`);
+  } else {
+    const old = document.getElementById('dashDoneBanner');
+    if(old) old.remove();
+  }
+
+  renderJourney(document.getElementById('dashJourney'), s);
+  renderLevelCards(document.getElementById('dashLevelCards'));
+}
+
+function renderJourney(container, s){
+  const segs = LEVELS.map(l => {
+    const st = levelStats(l);
+    return {l, st, width: (levelSize(l)/TOTAL*100)};
+  });
+  const markerLeft = segs.reduce((acc,seg,i)=>{
+    if(i < s.currentIndex) return acc + seg.width;
+    if(i === s.currentIndex) return acc + seg.width * (s.levelPct/100);
+    return acc;
+  },0);
+  container.innerHTML = `
+    <h3>Путь по курсу</h3>
+    <p class="hint">Beginner → Elementary → Pre-Intermediate → Контрольные</p>
+    <div class="journey-marker"><div class="pin" style="left:${markerLeft.toFixed(2)}%">вы здесь · ${s.maxViewed || 0}</div></div>
+    <div class="journey-track">
+      ${segs.map(seg => `<div class="journey-seg" style="width:${seg.width}%;background:color-mix(in srgb, ${seg.l.color} 18%, transparent);">
+        <i style="width:${seg.st.pct}%;background:${seg.l.color}"></i>
+      </div>`).join('')}
+    </div>
+    <div class="journey-labels">
+      ${segs.map(seg => `<div class="lab" style="width:${seg.width}%">${seg.l.name}<br/><span class="num">${seg.st.pct}%</span></div>`).join('')}
+    </div>
+  `;
+}
+
+function renderLevelCards(container){
+  container.innerHTML = LEVELS.map(l => {
+    const st = levelStats(l);
+    return `
+      <div class="card lvl-card">
+        <div class="head">
+          <div class="name"><span class="dot" style="background:${l.color}"></span>${l.name}</div>
+          <div class="pct num">${st.pct}%</div>
+        </div>
+        <div class="sub">${st.count} / ${st.size} · уроки ${l.start}–${l.end}</div>
+        <div class="bar"><i style="width:${st.pct}%;background:${l.color}"></i></div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ===================== RENDER: PROGRESS PAGE ===================== */
+function renderProgressPage(){
+  const s = computeStats();
+  document.getElementById('progOverallPct').textContent = s.overallPct + '%';
+  document.getElementById('progOverallSub').textContent =
+    `${s.viewedCount} из ${TOTAL} уникальных уроков просмотрено` + (s.completed ? ' — курс завершён 🎉' : '');
+  document.getElementById('progOverallBar').style.width = s.overallPct + '%';
+  renderJourney(document.getElementById('progJourney'), s);
+  renderLevelCards(document.getElementById('progLevelCards'));
+}
+
+/* ===================== RENDER: LESSONS ===================== */
+function getFilteredLessons(){
+  let arr = [];
+  if(state.lessonsFilter === 'all'){
+    for(let n=1;n<=TOTAL;n++) arr.push(n);
+  } else {
+    const lvl = LEVELS.find(l => l.key === state.lessonsFilter);
+    for(let n=lvl.start;n<=lvl.end;n++) arr.push(n);
+  }
+  if(state.lessonsSearch.trim()){
+    const q = state.lessonsSearch.trim();
+    arr = arr.filter(n => String(n).includes(q));
+  }
+  return arr;
+}
+
+function renderLessonsFilterSeg(){
+  const seg = document.getElementById('lessonsFilterSeg');
+  const opts = [{key:'all', name:'Все'}, ...LEVELS.map(l=>({key:l.key, name:l.name}))];
+  seg.innerHTML = opts.map(o => `<button data-f="${o.key}" class="${state.lessonsFilter===o.key?'active':''}">${o.name}</button>`).join('');
+}
+
+function renderLessons(){
+  const filtered = getFilteredLessons();
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  if(state.lessonsPage > totalPages) state.lessonsPage = totalPages;
+  if(state.lessonsPage < 1) state.lessonsPage = 1;
+  const start = (state.lessonsPage-1)*PAGE_SIZE;
+  const pageItems = filtered.slice(start, start+PAGE_SIZE);
+
+  document.getElementById('lessonsCount').textContent = `${state.viewed.size} / ${TOTAL} просмотрено`;
+
+  const grid = document.getElementById('lessonsGrid');
+  if(pageItems.length === 0){
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1;">Ничего не найдено</div>`;
+  } else {
+    grid.innerHTML = pageItems.map(n => {
+      const lvl = levelOf(n);
+      const done = state.viewed.has(n);
+      return `
+        <div class="lesson-item ${done?'done':''}" data-n="${n}">
+          <div class="row1">
+            <span class="lnum num">#${n}</span>
+            <span class="badge" style="background:${lvl.color};color:#fff">${lvl.name.split('-')[0]}</span>
+          </div>
+          <button data-action="toggle" data-n="${n}">${done ? '✓ Просмотрено' : 'Просмотрел'}</button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  const pager = document.getElementById('lessonsPager');
+  pager.innerHTML = filtered.length ? `
+    <button class="btn small" id="lessonsPrev" ${state.lessonsPage<=1?'disabled':''}>← Назад</button>
+    <span>Страница <span class="num">${state.lessonsPage}</span> из <span class="num">${totalPages}</span> · показано ${pageItems.length} из ${filtered.length}</span>
+    <button class="btn small" id="lessonsNext" ${state.lessonsPage>=totalPages?'disabled':''}>Вперёд →</button>
+  ` : '';
+
+  const prevBtn = document.getElementById('lessonsPrev');
+  const nextBtn = document.getElementById('lessonsNext');
+  if(prevBtn) prevBtn.onclick = () => { state.lessonsPage--; renderLessons(); window.scrollTo({top:0,behavior:'smooth'}); };
+  if(nextBtn) nextBtn.onclick = () => { state.lessonsPage++; renderLessons(); window.scrollTo({top:0,behavior:'smooth'}); };
+}
+
+async function toggleLesson(n){
+  if(state.viewed.has(n)) state.viewed.delete(n); else state.viewed.add(n);
+  await DataStore.saveProgress(Array.from(state.viewed));
+  renderLessons();
+  if(state.page === 'dashboard') renderDashboard();
+  if(state.page === 'progress') renderProgressPage();
+}
+
+/* ===================== RENDER: VOCAB ===================== */
+function uid(){ return 'v_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8); }
+
+function getFilteredVocab(){
+  let arr = state.vocab.slice().sort((a,b)=> a.word.localeCompare(b.word, 'ru'));
+  const q = state.vocabSearch.trim().toLowerCase();
+  if(q){
+    arr = arr.filter(v => v.word.toLowerCase().includes(q) || v.translation.toLowerCase().includes(q));
+  }
+  return arr;
+}
+
+function renderVocab(){
+  document.getElementById('vocabCount').textContent = `Всего слов: ${state.vocab.length}`;
+  const list = getFilteredVocab();
+  const el = document.getElementById('vocabList');
+  if(list.length === 0){
+    el.innerHTML = `<div class="empty">${state.vocab.length===0 ? 'Словарь пока пуст — добавьте первое слово выше.' : 'Ничего не найдено по запросу.'}</div>`;
+    return;
+  }
+  el.innerHTML = list.map(v => `
+    <div class="vocab-row" data-id="${v.id}">
+      <span class="w">${escapeHtml(v.word)}</span>
+      <span class="t">${escapeHtml(v.translation)}</span>
+      <div class="actions">
+        <button class="btn small" data-action="edit-vocab" data-id="${v.id}">✎</button>
+        <button class="btn small" data-action="delete-vocab" data-id="${v.id}">🗑</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function addVocab(word, translation){
+  word = word.trim(); translation = translation.trim();
+  if(!word || !translation) return {ok:false, msg:'Заполните оба поля'};
+  const dup = state.vocab.find(v => v.word.toLowerCase()===word.toLowerCase() && v.translation.toLowerCase()===translation.toLowerCase());
+  if(dup) return {ok:false, msg:'Такое слово с таким переводом уже есть в словаре'};
+  state.vocab.push({id: uid(), word, translation});
+  await DataStore.saveVocab(state.vocab);
+  return {ok:true};
+}
+async function updateVocab(id, word, translation){
+  word = word.trim(); translation = translation.trim();
+  if(!word || !translation) return {ok:false, msg:'Заполните оба поля'};
+  const dup = state.vocab.find(v => v.id!==id && v.word.toLowerCase()===word.toLowerCase() && v.translation.toLowerCase()===translation.toLowerCase());
+  if(dup) return {ok:false, msg:'Такое слово с таким переводом уже есть в словаре'};
+  const item = state.vocab.find(v => v.id===id);
+  if(!item) return {ok:false, msg:'Слово не найдено'};
+  item.word = word; item.translation = translation;
+  await DataStore.saveVocab(state.vocab);
+  return {ok:true};
+}
+async function deleteVocab(id){
+  state.vocab = state.vocab.filter(v => v.id !== id);
+  await DataStore.saveVocab(state.vocab);
+}
+
+/* ===================== MODALS ===================== */
+const overlay = document.getElementById('modal-overlay');
+function closeModal(){ overlay.classList.add('hidden'); overlay.innerHTML=''; }
+function openModal(html){ overlay.innerHTML = `<div class="modal">${html}</div>`; overlay.classList.remove('hidden'); }
+overlay.addEventListener('click', (e) => { if(e.target === overlay) closeModal(); });
+
+function showConfirm({title, text, confirmLabel, danger, onConfirm}){
+  openModal(`
+    <h3>${title}</h3>
+    <p>${text}</p>
+    <div class="actions">
+      <button class="btn ghost" id="modalCancel">Отмена</button>
+      <button class="btn ${danger?'danger':'primary'}" id="modalConfirm">${confirmLabel}</button>
+    </div>
+  `);
+  document.getElementById('modalCancel').onclick = closeModal;
+  document.getElementById('modalConfirm').onclick = async () => { await onConfirm(); closeModal(); };
+}
+
+function showVocabForm(existing){
+  const isEdit = !!existing;
+  openModal(`
+    <h3>${isEdit ? 'Изменить слово' : 'Новое слово'}</h3>
+    <div class="field"><label>Слово</label><input type="text" id="mWord" value="${isEdit ? escapeHtml(existing.word) : ''}" /></div>
+    <div class="field"><label>Перевод</label><input type="text" id="mTranslation" value="${isEdit ? escapeHtml(existing.translation) : ''}" /></div>
+    <div class="err hidden" id="mErr"></div>
+    <div class="actions">
+      <button class="btn ghost" id="modalCancel">Отмена</button>
+      <button class="btn primary" id="modalSave">${isEdit ? 'Сохранить' : 'Добавить'}</button>
+    </div>
+  `);
+  document.getElementById('modalCancel').onclick = closeModal;
+  document.getElementById('modalSave').onclick = async () => {
+    const w = document.getElementById('mWord').value;
+    const t = document.getElementById('mTranslation').value;
+    const res = isEdit ? await updateVocab(existing.id, w, t) : await addVocab(w, t);
+    if(!res.ok){
+      const errEl = document.getElementById('mErr');
+      errEl.textContent = res.msg; errEl.classList.remove('hidden');
+      return;
+    }
+    closeModal();
+    renderVocab();
+    renderDashboard();
+    showToast(isEdit ? 'Слово обновлено' : 'Слово добавлено');
+  };
+}
+
+/* ===================== TOAST ===================== */
+function showToast(msg){
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 2200);
+}
+
+/* ===================== PAGE ROUTER ===================== */
+function switchPage(page){
+  state.page = page;
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b.dataset.page===page));
+  document.querySelectorAll('section.page').forEach(s => s.classList.toggle('active', s.id === 'page-'+page));
+  if(page==='dashboard') renderDashboard();
+  if(page==='lessons') renderLessons();
+  if(page==='vocab') renderVocab();
+  if(page==='progress') renderProgressPage();
+}
+
+/* ===================== STATIC UI (built once) ===================== */
+function buildStaticUI(){
+  renderLessonsFilterSeg();
+
+  document.getElementById('tabs').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-page]');
+    if(btn) switchPage(btn.dataset.page);
+  });
+
+  document.getElementById('themeToggle').addEventListener('click', async () => {
+    state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    applyTheme();
+    await DataStore.saveSettings({theme: state.theme});
+    syncSettingsSeg();
+  });
+
+  document.getElementById('settingsThemeSeg').addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-t]');
+    if(!btn) return;
+    state.theme = btn.dataset.t;
+    applyTheme();
+    await DataStore.saveSettings({theme: state.theme});
+    syncSettingsSeg();
+  });
+  syncSettingsSeg();
+
+  document.getElementById('lessonsFilterSeg').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-f]');
+    if(!btn) return;
+    state.lessonsFilter = btn.dataset.f;
+    state.lessonsPage = 1;
+    renderLessonsFilterSeg();
+    renderLessons();
+  });
+
+  document.getElementById('lessonsSearch').addEventListener('input', (e) => {
+    state.lessonsSearch = e.target.value;
+    state.lessonsPage = 1;
+    renderLessons();
+  });
+
+  document.getElementById('lessonsGrid').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-action="toggle"]');
+    if(!btn) return;
+    toggleLesson(parseInt(btn.dataset.n,10));
+  });
+
+  document.getElementById('vocabAddBtn').addEventListener('click', async () => {
+    const wEl = document.getElementById('vocabWordInput');
+    const tEl = document.getElementById('vocabTranslationInput');
+    const res = await addVocab(wEl.value, tEl.value);
+    if(!res.ok){ showToast(res.msg); return; }
+    wEl.value=''; tEl.value='';
+    renderVocab(); renderDashboard();
+    showToast('Слово добавлено');
+  });
+  document.getElementById('vocabWordInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter') document.getElementById('vocabAddBtn').click(); });
+  document.getElementById('vocabTranslationInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter') document.getElementById('vocabAddBtn').click(); });
+
+  document.getElementById('vocabSearch').addEventListener('input', (e) => {
+    state.vocabSearch = e.target.value;
+    renderVocab();
+  });
+
+  document.getElementById('vocabList').addEventListener('click', (e) => {
+    const editBtn = e.target.closest('button[data-action="edit-vocab"]');
+    const delBtn = e.target.closest('button[data-action="delete-vocab"]');
+    if(editBtn){
+      const item = state.vocab.find(v => v.id === editBtn.dataset.id);
+      if(item) showVocabForm(item);
+    }
+    if(delBtn){
+      const item = state.vocab.find(v => v.id === delBtn.dataset.id);
+      if(!item) return;
+      showConfirm({
+        title:'Удалить слово?',
+        text:`«${item.word} — ${item.translation}» будет удалено из словаря.`,
+        confirmLabel:'Удалить', danger:true,
+        onConfirm: async () => { await deleteVocab(item.id); renderVocab(); renderDashboard(); showToast('Слово удалено'); }
+      });
+    }
+  });
+
+  document.getElementById('resetProgressBtn').addEventListener('click', () => {
+    showConfirm({
+      title:'Сбросить весь прогресс?',
+      text:`Отметки о просмотре со всех ${TOTAL} уроков будут сняты. Это действие нельзя отменить.`,
+      confirmLabel:'Сбросить', danger:true,
+      onConfirm: async () => {
+        state.viewed = new Set();
+        await DataStore.saveProgress([]);
+        state.lessonsPage = 1;
+        renderAll();
+        showToast('Прогресс сброшен');
+      }
+    });
+  });
+
+  document.getElementById('clearVocabBtn').addEventListener('click', () => {
+    showConfirm({
+      title:'Очистить словарь?',
+      text:'Все слова будут удалены безвозвратно.',
+      confirmLabel:'Очистить', danger:true,
+      onConfirm: async () => {
+        state.vocab = [];
+        await DataStore.saveVocab([]);
+        renderAll();
+        showToast('Словарь очищен');
+      }
+    });
+  });
+}
+
+function syncSettingsSeg(){
+  document.querySelectorAll('#settingsThemeSeg button').forEach(b => b.classList.toggle('active', b.dataset.t === state.theme));
+}
+
+/* ===================== RENDER ALL ===================== */
+function renderAll(){
+  renderDashboard();
+  renderLessons();
+  renderVocab();
+  renderProgressPage();
+}
+
+init();
+})();
+</script>
+</body>
+</html>
